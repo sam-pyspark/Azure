@@ -1,0 +1,24 @@
+{
+	"name": "DS_BLOB_TGT_EMP",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ABLB_TGT",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"folderPath": "Target",
+				"container": "pysparkcontainer"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

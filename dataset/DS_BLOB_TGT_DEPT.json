@@ -1,0 +1,22 @@
+{
+	"name": "DS_BLOB_TGT_DEPT",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ABLB_TGT",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

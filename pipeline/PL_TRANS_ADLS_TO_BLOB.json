@@ -1,0 +1,35 @@
+{
+	"name": "PL_TRANS_ADLS_TO_BLOB",
+	"properties": {
+		"description": "joining emp and dept tables from ADLS and creating file in BLOB",
+		"activities": [
+			{
+				"name": "df_emp_dept",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "df_emp_dept",
+						"type": "DataFlowReference"
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2021-02-01T02:15:15Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
