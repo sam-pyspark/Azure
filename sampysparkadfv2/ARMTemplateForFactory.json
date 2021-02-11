@@ -93,17 +93,13 @@
 						"userProperties": [],
 						"typeProperties": {
 							"dataflow": {
-								"referenceName": "df_emp_dept",
+								"referenceName": "df_emp_filter_sort",
 								"type": "DataFlowReference",
 								"parameters": {},
 								"datasetParameters": {
 									"source1": {},
-									"source2": {},
-									"source3": {},
 									"sink1": {},
-									"sink2": {},
-									"sink3": {},
-									"sink4": {}
+									"sink2": {}
 								}
 							},
 							"staging": {},
@@ -119,7 +115,7 @@
 				"lastPublishTime": "2021-02-01T02:15:15Z"
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/dataflows/df_emp_dept')]"
+				"[concat(variables('factoryId'), '/dataflows/df_emp_filter_sort')]"
 			]
 		},
 		{
@@ -168,6 +164,50 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/dataflows/df_exists_union_lookup')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_TRANS_FILTER_SORT')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "df_emp_filter_sort",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "df_emp_filter_sort",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"source1": {},
+									"sink1": {},
+									"sink2": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/df_emp_filter_sort')]"
 			]
 		},
 		{
@@ -479,7 +519,7 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/df_emp_dept')]",
+			"name": "[concat(parameters('factoryName'), '/df_emp_filter_sort')]",
 			"type": "Microsoft.DataFactory/factories/dataflows",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -492,26 +532,12 @@
 								"type": "DatasetReference"
 							},
 							"name": "source1"
-						},
-						{
-							"dataset": {
-								"referenceName": "DS_ADLS_SRC_DEPT",
-								"type": "DatasetReference"
-							},
-							"name": "source2"
-						},
-						{
-							"dataset": {
-								"referenceName": "DS_ADLS_SRC_EMP",
-								"type": "DatasetReference"
-							},
-							"name": "source3"
 						}
 					],
 					"sinks": [
 						{
 							"dataset": {
-								"referenceName": "DS_BLOB_TGT_JOIN",
+								"referenceName": "DS_BLOB_TGT_EMP",
 								"type": "DatasetReference"
 							},
 							"name": "sink1"
@@ -522,37 +548,21 @@
 								"type": "DatasetReference"
 							},
 							"name": "sink2"
-						},
-						{
-							"dataset": {
-								"referenceName": "DS_BLOB_TGT_EMP",
-								"type": "DatasetReference"
-							},
-							"name": "sink3"
-						},
-						{
-							"dataset": {
-								"referenceName": "DS_BLOB_TGT_EMP",
-								"type": "DatasetReference"
-							},
-							"name": "sink4"
 						}
 					],
 					"transformations": [
 						{
-							"name": "Join1"
+							"name": "Filter1"
 						},
 						{
-							"name": "ConditionalSplit1"
+							"name": "Sort1"
 						}
 					],
-					"script": "source(output(\n\t\tEMPNO as integer,\n\t\tENAME as string,\n\t\tJOB as string,\n\t\tMGR as integer,\n\t\tHIREDATE as date,\n\t\tSAL as integer,\n\t\tCOMM as integer,\n\t\tDEPTNO as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> source1\nsource(output(\n\t\tDeptno as integer,\n\t\tDname as string,\n\t\tLoc as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> source2\nsource(output(\n\t\tEMPNO as string,\n\t\tENAME as string,\n\t\tJOB as string,\n\t\tMGR as string,\n\t\tHIREDATE as string,\n\t\tSAL as string,\n\t\tCOMM as string,\n\t\tDEPTNO as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> source3\nsource1, source2 join(source1@DEPTNO == source2@Deptno,\n\tjoinType:'inner',\n\tbroadcast: 'auto')~> Join1\nsource3 split(DEPTNO == '10',\n\tDEPTNO == '20',\n\tdisjoint: false) ~> ConditionalSplit1@(dept10, dept20, otherdept)\nJoin1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['emp_dept_inner_join.csv'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink1\nConditionalSplit1@dept10 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink2\nConditionalSplit1@dept20 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink3\nConditionalSplit1@otherdept sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink4"
+					"script": "source(output(\n\t\tEMPNO as short,\n\t\tENAME as string,\n\t\tJOB as string,\n\t\tMGR as string,\n\t\tHIREDATE as string,\n\t\tSAL as short,\n\t\tCOMM as string,\n\t\tDEPTNO as short\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> source1\nsource1 filter(DEPTNO == 10) ~> Filter1\nsource1 sort(asc(DEPTNO, true)) ~> Sort1\nFilter1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['emp_filter.csv'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink1\nSort1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['emp_sort..csv'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink2"
 				}
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/DS_ADLS_SRC_EMP')]",
-				"[concat(variables('factoryId'), '/datasets/DS_ADLS_SRC_DEPT')]",
-				"[concat(variables('factoryId'), '/datasets/DS_BLOB_TGT_JOIN')]",
 				"[concat(variables('factoryId'), '/datasets/DS_BLOB_TGT_EMP')]"
 			]
 		},
@@ -624,44 +634,6 @@
 				"[concat(variables('factoryId'), '/datasets/DS_ADLS_SRC_EMP')]",
 				"[concat(variables('factoryId'), '/datasets/DS_ADLS_SRC_DEPT')]",
 				"[concat(variables('factoryId'), '/datasets/DS_BLOB_TGT_EXISTS_UNION_LOOKUP')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/dataflow1')]",
-			"type": "Microsoft.DataFactory/factories/dataflows",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "MappingDataFlow",
-				"typeProperties": {
-					"sources": [
-						{
-							"dataset": {
-								"referenceName": "DS_ADLS_SRC_EMP",
-								"type": "DatasetReference"
-							},
-							"name": "source1"
-						}
-					],
-					"sinks": [
-						{
-							"dataset": {
-								"referenceName": "DS_BLOB_TGT_EMP",
-								"type": "DatasetReference"
-							},
-							"name": "sink1"
-						}
-					],
-					"transformations": [
-						{
-							"name": "Filter1"
-						}
-					],
-					"script": "source(output(\n\t\tEMPNO as short,\n\t\tENAME as string,\n\t\tJOB as string,\n\t\tMGR as string,\n\t\tHIREDATE as string,\n\t\tSAL as short,\n\t\tCOMM as string,\n\t\tDEPTNO as short\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> source1\nsource1 filter(DEPTNO == 10) ~> Filter1\nFilter1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['emp_filter.csv'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink1"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_ADLS_SRC_EMP')]",
-				"[concat(variables('factoryId'), '/datasets/DS_BLOB_TGT_EMP')]"
 			]
 		}
 	]
