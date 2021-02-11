@@ -1,0 +1,54 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "sampysparkadfv2"
+		},
+		"LS_ABLB_SRC_connectionString": {
+			"value": ""
+		},
+		"LS_ABLB_TGT_connectionString": {
+			"value": ""
+		},
+		"LS_ADLS_servicePrincipalKey": {
+			"value": ""
+		},
+		"LS_ADLS_TEST_servicePrincipalKey": {
+			"value": ""
+		},
+		"LS_ORCL_SRC_DB_connectionString": {
+			"value": ""
+		},
+		"LS_ADLS_properties_typeProperties_dataLakeStoreUri": {
+			"value": "https://samdatalake.azuredatalakestore.net/webhdfs/v1"
+		},
+		"LS_ADLS_properties_typeProperties_servicePrincipalId": {
+			"value": "6d90f351-495b-4a95-81b8-1629cdda79aa"
+		},
+		"LS_ADLS_properties_typeProperties_tenant": {
+			"value": "d79e8a65-cdaf-463b-bd04-58740f5cad7c"
+		},
+		"LS_ADLS_properties_typeProperties_subscriptionId": {
+			"value": "477ff2b5-e627-491d-beab-e7cd08c720bd"
+		},
+		"LS_ADLS_properties_typeProperties_resourceGroupName": {
+			"value": "rg_dev"
+		},
+		"LS_ADLS_TEST_properties_typeProperties_dataLakeStoreUri": {
+			"value": "https://samdatalake.azuredatalakestore.net/webhdfs/v1"
+		},
+		"LS_ADLS_TEST_properties_typeProperties_servicePrincipalId": {
+			"value": "ca1314d3-fd9c-40e7-a7b1-d2cc6d5823a7"
+		},
+		"LS_ADLS_TEST_properties_typeProperties_tenant": {
+			"value": "d79e8a65-cdaf-463b-bd04-58740f5cad7c"
+		},
+		"LS_ADLS_TEST_properties_typeProperties_subscriptionId": {
+			"value": "477ff2b5-e627-491d-beab-e7cd08c720bd"
+		},
+		"LS_ADLS_TEST_properties_typeProperties_resourceGroupName": {
+			"value": "rg_dev"
+		}
+	}
+}
