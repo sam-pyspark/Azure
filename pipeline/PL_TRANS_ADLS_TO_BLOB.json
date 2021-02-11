@@ -17,7 +17,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "df_emp_dept",
+						"referenceName": "df_emp_filter_sort",
 						"type": "DataFlowReference"
 					},
 					"compute": {
