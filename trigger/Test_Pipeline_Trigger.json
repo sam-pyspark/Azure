@@ -21,7 +21,7 @@
 				"frequency": "Minute",
 				"interval": 1,
 				"startTime": "2021-02-12T01:54:00Z",
-				"endTime": "2021-02-13T01:59:00Z",
+				"endTime": "2021-02-12T01:59:00Z",
 				"timeZone": "UTC"
 			}
 		}
