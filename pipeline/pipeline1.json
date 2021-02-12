@@ -27,6 +27,19 @@
 						"type": "Expression"
 					}
 				}
+			},
+			{
+				"name": "trigger name",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "V_Name",
+					"value": {
+						"value": "@pipeline().TriggerName",
+						"type": "Expression"
+					}
+				}
 			}
 		],
 		"parameters": {
