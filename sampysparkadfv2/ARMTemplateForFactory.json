@@ -66,6 +66,14 @@
 		"LS_ADLS_TEST_properties_typeProperties_resourceGroupName": {
 			"type": "string",
 			"defaultValue": "rg_dev"
+		},
+		"Test_Pipeline_Trigger_properties_pipeline1_parameters_P_Name": {
+			"type": "string",
+			"defaultValue": "sam"
+		},
+		"Test_Pipeline_Trigger_properties_pipeline1_parameters_P_Age": {
+			"type": "string",
+			"defaultValue": "20"
 		}
 	},
 	"variables": {
@@ -880,6 +888,40 @@
 				"[concat(variables('factoryId'), '/datasets/DS_ADLS_SRC_EMP')]",
 				"[concat(variables('factoryId'), '/datasets/DS_ADLS_SRC_DEPT')]",
 				"[concat(variables('factoryId'), '/datasets/DS_BLOB_TGT_EXISTS_UNION_LOOKUP')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Test_Pipeline_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "pipeline1",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"P_Name": "[parameters('Test_Pipeline_Trigger_properties_pipeline1_parameters_P_Name')]",
+							"P_Age": "[parameters('Test_Pipeline_Trigger_properties_pipeline1_parameters_P_Age')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Minute",
+						"interval": 1,
+						"startTime": "2021-02-12T01:54:00Z",
+						"endTime": "2021-02-12T01:59:00Z",
+						"timeZone": "UTC"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/pipeline1')]"
 			]
 		}
 	]

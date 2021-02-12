@@ -67,6 +67,14 @@
 			"type": "string",
 			"defaultValue": "rg_dev"
 		},
+		"Test_Pipeline_Trigger_properties_pipeline1_parameters_P_Name": {
+			"type": "string",
+			"defaultValue": "sam"
+		},
+		"Test_Pipeline_Trigger_properties_pipeline1_parameters_P_Age": {
+			"type": "string",
+			"defaultValue": "20"
+		},
 		"containerUri": {
 			"type": "string",
 			"metadata": "URI to storage account containing linked ARM templates"
@@ -138,6 +146,12 @@
 					},
 					"LS_ADLS_TEST_properties_typeProperties_resourceGroupName": {
 						"value": "[parameters('LS_ADLS_TEST_properties_typeProperties_resourceGroupName')]"
+					},
+					"Test_Pipeline_Trigger_properties_pipeline1_parameters_P_Name": {
+						"value": "[parameters('Test_Pipeline_Trigger_properties_pipeline1_parameters_P_Name')]"
+					},
+					"Test_Pipeline_Trigger_properties_pipeline1_parameters_P_Age": {
+						"value": "[parameters('Test_Pipeline_Trigger_properties_pipeline1_parameters_P_Age')]"
 					}
 				}
 			},

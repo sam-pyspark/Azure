@@ -50,6 +50,12 @@
 		"LS_ADLS_TEST_properties_typeProperties_resourceGroupName": {
 			"value": "rg_dev"
 		},
+		"Test_Pipeline_Trigger_properties_pipeline1_parameters_P_Name": {
+			"value": "sam"
+		},
+		"Test_Pipeline_Trigger_properties_pipeline1_parameters_P_Age": {
+			"value": "20"
+		},
 		"containerUri": {
 			"value": ""
 		},

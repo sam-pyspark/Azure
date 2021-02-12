@@ -66,6 +66,14 @@
 		"LS_ADLS_TEST_properties_typeProperties_resourceGroupName": {
 			"type": "string",
 			"defaultValue": "rg_dev"
+		},
+		"Test_Pipeline_Trigger_properties_pipeline1_parameters_P_Name": {
+			"type": "string",
+			"defaultValue": "sam"
+		},
+		"Test_Pipeline_Trigger_properties_pipeline1_parameters_P_Age": {
+			"type": "string",
+			"defaultValue": "20"
 		}
 	},
 	"variables": {
@@ -537,6 +545,40 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/Test_Pipeline_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "pipeline1",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"P_Name": "[parameters('Test_Pipeline_Trigger_properties_pipeline1_parameters_P_Name')]",
+							"P_Age": "[parameters('Test_Pipeline_Trigger_properties_pipeline1_parameters_P_Age')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Minute",
+						"interval": 1,
+						"startTime": "2021-02-12T01:54:00Z",
+						"endTime": "2021-02-12T01:59:00Z",
+						"timeZone": "UTC"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/pipeline1')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/df_Schema_modifiers')]",
 			"type": "Microsoft.DataFactory/factories/dataflows",
 			"apiVersion": "2018-06-01",
@@ -793,50 +835,6 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/dataflows/df_exists_union_lookup')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PL_TRANS_FILTER_SORT')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "df_emp_filter_sort",
-						"type": "ExecuteDataFlow",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "df_emp_filter_sort",
-								"type": "DataFlowReference",
-								"parameters": {},
-								"datasetParameters": {
-									"source1": {},
-									"sink1": {},
-									"sink2": {}
-								}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"traceLevel": "Fine"
-						}
-					}
-				],
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/dataflows/df_emp_filter_sort')]"
 			]
 		}
 	]
