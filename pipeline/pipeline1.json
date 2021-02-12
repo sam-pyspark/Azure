@@ -1,0 +1,53 @@
+{
+	"name": "pipeline1",
+	"properties": {
+		"activities": [
+			{
+				"name": "ADFname",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "V_Name",
+					"value": {
+						"value": "@pipeline().DataFactory",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Pipeline Name",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "V_Name",
+					"value": {
+						"value": "@pipeline().Pipeline",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"P_Name": {
+				"type": "string",
+				"defaultValue": "Raju"
+			},
+			"P_Age": {
+				"type": "string",
+				"defaultValue": "35"
+			}
+		},
+		"variables": {
+			"V_Name": {
+				"type": "String",
+				"defaultValue": "Ram"
+			},
+			"V_Array": {
+				"type": "Array"
+			}
+		},
+		"annotations": []
+	}
+}
