@@ -211,6 +211,118 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/PL_TRANS_JSON')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "df_Schema_modifiers",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "df_Schema_modifiers",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"source1": {},
+									"sink1": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/df_Schema_modifiers')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pipeline1')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "ADFname",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "V_Name",
+							"value": {
+								"value": "@pipeline().DataFactory",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Pipeline Name",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "V_Name",
+							"value": {
+								"value": "@pipeline().Pipeline",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "trigger name",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "V_Name",
+							"value": {
+								"value": "@pipeline().TriggerName",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"parameters": {
+					"P_Name": {
+						"type": "string",
+						"defaultValue": "Raju"
+					},
+					"P_Age": {
+						"type": "string",
+						"defaultValue": "35"
+					}
+				},
+				"variables": {
+					"V_Name": {
+						"type": "String",
+						"defaultValue": "Ram"
+					},
+					"V_Array": {
+						"type": "Array"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/DS_ADLS_SRC_DEPT')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -307,6 +419,93 @@
 						"type": "String"
 					}
 				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ADLS_SRC_JSON')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ADLS",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureDataLakeStoreLocation",
+						"fileName": "sample_json.json",
+						"folderPath": "source"
+					}
+				},
+				"schema": {
+					"type": "object",
+					"properties": {
+						"name": {
+							"type": "string"
+						},
+						"location": {
+							"type": "string"
+						},
+						"satellites": {
+							"type": "array",
+							"items": {
+								"type": "string"
+							}
+						},
+						"goods": {
+							"type": "object",
+							"properties": {
+								"trade": {
+									"type": "boolean"
+								},
+								"customers": {
+									"type": "array",
+									"items": {
+										"type": "string"
+									}
+								},
+								"orders": {
+									"type": "array",
+									"items": {
+										"type": "object",
+										"properties": {
+											"orderId": {
+												"type": "integer"
+											},
+											"orderTotal": {
+												"type": "number"
+											},
+											"shipped": {
+												"type": "object",
+												"properties": {
+													"orderItems": {
+														"type": "array",
+														"items": {
+															"type": "object",
+															"properties": {
+																"itemName": {
+																	"type": "string"
+																},
+																"itemQty": {
+																	"type": "integer"
+																}
+															}
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS')]"
@@ -517,6 +716,53 @@
 				"typeProperties": {}
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/df_Schema_modifiers')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "DS_ADLS_SRC_JSON",
+								"type": "DatasetReference"
+							},
+							"name": "source1"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "DS_BLOB_TGT_EMP",
+								"type": "DatasetReference"
+							},
+							"name": "sink1"
+						}
+					],
+					"transformations": [
+						{
+							"name": "Flatten1"
+						},
+						{
+							"name": "Flatten2"
+						},
+						{
+							"name": "Flatten3"
+						},
+						{
+							"name": "Flatten4"
+						}
+					],
+					"script": "source(output(\n\t\tname as string,\n\t\tlocation as string,\n\t\tsatellites as string[],\n\t\tgoods as (trade as boolean, customers as string[], orders as (orderId as string, orderTotal as double, shipped as (orderItems as (itemName as string, itemQty as string)[]))[])\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tdocumentForm: 'singleDocument') ~> source1\nsource1 foldDown(unroll(satellites),\n\tmapColumn(\n\t\tname,\n\t\tlocation,\n\t\tsatellites,\n\t\tgoods\n\t),\n\tskipDuplicateMapInputs: false,\n\tskipDuplicateMapOutputs: false) ~> Flatten1\nFlatten1 foldDown(unroll(goods.orders),\n\tmapColumn(\n\t\tname,\n\t\tlocation,\n\t\tsatellites,\n\t\ttrade = goods.trade,\n\t\tcustomers = goods.customers,\n\t\torderId = goods.orders.orderId,\n\t\torderTotal = goods.orders.orderTotal,\n\t\tshipped = goods.orders.shipped\n\t),\n\tskipDuplicateMapInputs: false,\n\tskipDuplicateMapOutputs: false) ~> Flatten2\nFlatten2 foldDown(unroll(customers),\n\tmapColumn(\n\t\tname,\n\t\tlocation,\n\t\tsatellites,\n\t\ttrade,\n\t\tcustomers,\n\t\torderId,\n\t\torderTotal,\n\t\tshipped\n\t),\n\tskipDuplicateMapInputs: false,\n\tskipDuplicateMapOutputs: false) ~> Flatten3\nFlatten3 foldDown(unroll(shipped.orderItems),\n\tmapColumn(\n\t\tname,\n\t\tlocation,\n\t\tsatellites,\n\t\ttrade,\n\t\tcustomers,\n\t\torderId,\n\t\torderTotal,\n\t\titemName = shipped.orderItems.itemName,\n\t\titemQty = shipped.orderItems.itemQty\n\t),\n\tskipDuplicateMapInputs: false,\n\tskipDuplicateMapOutputs: false) ~> Flatten4\nFlatten4 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['sample_json.csv'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink1"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_ADLS_SRC_JSON')]",
+				"[concat(variables('factoryId'), '/datasets/DS_BLOB_TGT_EMP')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/df_emp_filter_sort')]",
