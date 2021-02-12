@@ -2,11 +2,11 @@
 	"name": "Test_Pipeline_Trigger",
 	"properties": {
 		"annotations": [],
-		"runtimeState": "Started",
+		"runtimeState": "Stopped",
 		"pipelines": [
 			{
 				"pipelineReference": {
-					"referenceName": "pipeline1",
+					"referenceName": "child_pipeline",
 					"type": "PipelineReference"
 				},
 				"parameters": {
