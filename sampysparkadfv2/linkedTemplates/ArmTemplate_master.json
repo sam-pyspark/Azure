@@ -7,6 +7,18 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "sampysparkadfv2"
 		},
+		"ADLS_GEN1_LS_servicePrincipalKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'servicePrincipalKey' of 'ADLS_GEN1_LS'"
+		},
+		"AzureDatabricks_LS_accessToken": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accessToken' of 'AzureDatabricks_LS'"
+		},
+		"BLOB_STORAGE_GEN2_LS_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'BLOB_STORAGE_GEN2_LS'"
+		},
 		"LS_ABLB_SRC_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'LS_ABLB_SRC'"
@@ -26,6 +38,34 @@
 		"LS_ORCL_SRC_DB_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'LS_ORCL_SRC_DB'"
+		},
+		"Metadata_SQLDB_LS_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'Metadata_SQLDB_LS'"
+		},
+		"LS_ABLB_Stage_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'LS_ABLB_Stage'"
+		},
+		"ADLS_GEN1_LS_properties_typeProperties_dataLakeStoreUri": {
+			"type": "string",
+			"defaultValue": "https://azureadlsgen1.azuredatalakestore.net/webhdfs/v1"
+		},
+		"ADLS_GEN1_LS_properties_typeProperties_servicePrincipalId": {
+			"type": "string",
+			"defaultValue": "18fc6caa-cd63-4a7a-b55e-6e8cfa5aac71"
+		},
+		"ADLS_GEN1_LS_properties_typeProperties_tenant": {
+			"type": "string",
+			"defaultValue": "09d69696-ccc0-4686-b28c-6e053d4d3f03"
+		},
+		"ADLS_GEN1_LS_properties_typeProperties_subscriptionId": {
+			"type": "string",
+			"defaultValue": "bd66c874-48fe-4dc8-87c6-d2d0e4100413"
+		},
+		"ADLS_GEN1_LS_properties_typeProperties_resourceGroupName": {
+			"type": "string",
+			"defaultValue": "my_rg"
 		},
 		"LS_ADLS_properties_typeProperties_dataLakeStoreUri": {
 			"type": "string",
@@ -67,11 +107,11 @@
 			"type": "string",
 			"defaultValue": "rg_dev"
 		},
-		"Test_Pipeline_Trigger_properties_pipeline1_parameters_P_Name": {
+		"Test_Pipeline_Trigger_properties_child_pipeline_parameters_P_Name": {
 			"type": "string",
 			"defaultValue": "sam"
 		},
-		"Test_Pipeline_Trigger_properties_pipeline1_parameters_P_Age": {
+		"Test_Pipeline_Trigger_properties_child_pipeline_parameters_P_Age": {
 			"type": "string",
 			"defaultValue": "20"
 		},
@@ -102,6 +142,15 @@
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
 					},
+					"ADLS_GEN1_LS_servicePrincipalKey": {
+						"value": "[parameters('ADLS_GEN1_LS_servicePrincipalKey')]"
+					},
+					"AzureDatabricks_LS_accessToken": {
+						"value": "[parameters('AzureDatabricks_LS_accessToken')]"
+					},
+					"BLOB_STORAGE_GEN2_LS_connectionString": {
+						"value": "[parameters('BLOB_STORAGE_GEN2_LS_connectionString')]"
+					},
 					"LS_ABLB_SRC_connectionString": {
 						"value": "[parameters('LS_ABLB_SRC_connectionString')]"
 					},
@@ -114,8 +163,26 @@
 					"LS_ADLS_TEST_servicePrincipalKey": {
 						"value": "[parameters('LS_ADLS_TEST_servicePrincipalKey')]"
 					},
-					"LS_ORCL_SRC_DB_connectionString": {
-						"value": "[parameters('LS_ORCL_SRC_DB_connectionString')]"
+					"Metadata_SQLDB_LS_connectionString": {
+						"value": "[parameters('Metadata_SQLDB_LS_connectionString')]"
+					},
+					"LS_ABLB_Stage_connectionString": {
+						"value": "[parameters('LS_ABLB_Stage_connectionString')]"
+					},
+					"ADLS_GEN1_LS_properties_typeProperties_dataLakeStoreUri": {
+						"value": "[parameters('ADLS_GEN1_LS_properties_typeProperties_dataLakeStoreUri')]"
+					},
+					"ADLS_GEN1_LS_properties_typeProperties_servicePrincipalId": {
+						"value": "[parameters('ADLS_GEN1_LS_properties_typeProperties_servicePrincipalId')]"
+					},
+					"ADLS_GEN1_LS_properties_typeProperties_tenant": {
+						"value": "[parameters('ADLS_GEN1_LS_properties_typeProperties_tenant')]"
+					},
+					"ADLS_GEN1_LS_properties_typeProperties_subscriptionId": {
+						"value": "[parameters('ADLS_GEN1_LS_properties_typeProperties_subscriptionId')]"
+					},
+					"ADLS_GEN1_LS_properties_typeProperties_resourceGroupName": {
+						"value": "[parameters('ADLS_GEN1_LS_properties_typeProperties_resourceGroupName')]"
 					},
 					"LS_ADLS_properties_typeProperties_dataLakeStoreUri": {
 						"value": "[parameters('LS_ADLS_properties_typeProperties_dataLakeStoreUri')]"
@@ -146,12 +213,6 @@
 					},
 					"LS_ADLS_TEST_properties_typeProperties_resourceGroupName": {
 						"value": "[parameters('LS_ADLS_TEST_properties_typeProperties_resourceGroupName')]"
-					},
-					"Test_Pipeline_Trigger_properties_pipeline1_parameters_P_Name": {
-						"value": "[parameters('Test_Pipeline_Trigger_properties_pipeline1_parameters_P_Name')]"
-					},
-					"Test_Pipeline_Trigger_properties_pipeline1_parameters_P_Age": {
-						"value": "[parameters('Test_Pipeline_Trigger_properties_pipeline1_parameters_P_Age')]"
 					}
 				}
 			},
@@ -170,6 +231,15 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
+					},
+					"LS_ORCL_SRC_DB_connectionString": {
+						"value": "[parameters('LS_ORCL_SRC_DB_connectionString')]"
+					},
+					"Test_Pipeline_Trigger_properties_child_pipeline_parameters_P_Name": {
+						"value": "[parameters('Test_Pipeline_Trigger_properties_child_pipeline_parameters_P_Name')]"
+					},
+					"Test_Pipeline_Trigger_properties_child_pipeline_parameters_P_Age": {
+						"value": "[parameters('Test_Pipeline_Trigger_properties_child_pipeline_parameters_P_Age')]"
 					}
 				}
 			},

@@ -7,6 +7,18 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "sampysparkadfv2"
 		},
+		"ADLS_GEN1_LS_servicePrincipalKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'servicePrincipalKey' of 'ADLS_GEN1_LS'"
+		},
+		"AzureDatabricks_LS_accessToken": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accessToken' of 'AzureDatabricks_LS'"
+		},
+		"BLOB_STORAGE_GEN2_LS_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'BLOB_STORAGE_GEN2_LS'"
+		},
 		"LS_ABLB_SRC_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'LS_ABLB_SRC'"
@@ -26,6 +38,34 @@
 		"LS_ORCL_SRC_DB_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'LS_ORCL_SRC_DB'"
+		},
+		"Metadata_SQLDB_LS_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'Metadata_SQLDB_LS'"
+		},
+		"LS_ABLB_Stage_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'LS_ABLB_Stage'"
+		},
+		"ADLS_GEN1_LS_properties_typeProperties_dataLakeStoreUri": {
+			"type": "string",
+			"defaultValue": "https://azureadlsgen1.azuredatalakestore.net/webhdfs/v1"
+		},
+		"ADLS_GEN1_LS_properties_typeProperties_servicePrincipalId": {
+			"type": "string",
+			"defaultValue": "18fc6caa-cd63-4a7a-b55e-6e8cfa5aac71"
+		},
+		"ADLS_GEN1_LS_properties_typeProperties_tenant": {
+			"type": "string",
+			"defaultValue": "09d69696-ccc0-4686-b28c-6e053d4d3f03"
+		},
+		"ADLS_GEN1_LS_properties_typeProperties_subscriptionId": {
+			"type": "string",
+			"defaultValue": "bd66c874-48fe-4dc8-87c6-d2d0e4100413"
+		},
+		"ADLS_GEN1_LS_properties_typeProperties_resourceGroupName": {
+			"type": "string",
+			"defaultValue": "my_rg"
 		},
 		"LS_ADLS_properties_typeProperties_dataLakeStoreUri": {
 			"type": "string",
@@ -67,11 +107,11 @@
 			"type": "string",
 			"defaultValue": "rg_dev"
 		},
-		"Test_Pipeline_Trigger_properties_pipeline1_parameters_P_Name": {
+		"Test_Pipeline_Trigger_properties_child_pipeline_parameters_P_Name": {
 			"type": "string",
 			"defaultValue": "sam"
 		},
-		"Test_Pipeline_Trigger_properties_pipeline1_parameters_P_Age": {
+		"Test_Pipeline_Trigger_properties_child_pipeline_parameters_P_Age": {
 			"type": "string",
 			"defaultValue": "20"
 		}
@@ -80,6 +120,132 @@
 		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
 	},
 	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/Master_pipeline')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Get Metadata1",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "DS_ADLS_SRC_DEPT",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"fieldList": [
+								"itemName",
+								"itemType"
+							],
+							"storeSettings": {
+								"type": "AzureDataLakeStoreReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
+							}
+						}
+					},
+					{
+						"name": "Set variable1",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Get Metadata1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "V_childItems",
+							"value": {
+								"value": "@activity('Get Metadata1').output.itemName",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Lookup1",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureDataLakeStoreReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"dataset": {
+								"referenceName": "DS_ADLS_SRC_DEPT",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						}
+					},
+					{
+						"name": "Validation1",
+						"type": "Validation",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "DS_ADLS_SRC_DEPT",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"timeout": "7.00:00:00",
+							"sleep": 10
+						}
+					},
+					{
+						"name": "Wait1",
+						"type": "Wait",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"waitTimeInSeconds": 1
+						}
+					}
+				],
+				"variables": {
+					"V_childItems": {
+						"type": "String",
+						"defaultValue": "Null"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_ADLS_SRC_DEPT')]"
+			]
+		},
 		{
 			"name": "[concat(parameters('factoryName'), '/PL_TRANS_ADLS_TO_BLOB')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
@@ -262,7 +428,199 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/pipeline1')]",
+			"name": "[concat(parameters('factoryName'), '/child_load_pipeline')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Hello from NDC Sydney!!!",
+				"activities": [
+					{
+						"name": "ForEach1",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Filter1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Filter1').output.value",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Copy data1",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "BinarySource",
+											"storeSettings": {
+												"type": "AzureDataLakeStoreReadSettings",
+												"recursive": true
+											},
+											"formatSettings": {
+												"type": "BinaryReadSettings"
+											}
+										},
+										"sink": {
+											"type": "BinarySink",
+											"storeSettings": {
+												"type": "AzureBlobStorageWriteSettings"
+											}
+										},
+										"enableStaging": false
+									},
+									"inputs": [
+										{
+											"referenceName": "Source_ADLS_DS",
+											"type": "DatasetReference",
+											"parameters": {
+												"FolderPath": {
+													"value": "@pipeline().parameters.SourceStore_Location",
+													"type": "Expression"
+												},
+												"Directory": {
+													"value": "@pipeline().parameters.SourceStore_Directory",
+													"type": "Expression"
+												},
+												"filename": {
+													"value": "@item().name",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "Target_BLOB_DS",
+											"type": "DatasetReference",
+											"parameters": {
+												"FolderPath": {
+													"value": "@pipeline().parameters.TargetStore_Location",
+													"type": "Expression"
+												},
+												"Directory": {
+													"value": "@pipeline().parameters.TargetStore_Directory",
+													"type": "Expression"
+												},
+												"filename": {
+													"value": "*.csv",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					},
+					{
+						"name": "Get Metadata1",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "Source_Folder_Metadata_DS",
+								"type": "DatasetReference",
+								"parameters": {
+									"FolderPath": {
+										"value": "@pipeline().parameters.SourceStore_Location",
+										"type": "Expression"
+									},
+									"Directory": {
+										"value": "@pipeline().parameters.SourceStore_Directory",
+										"type": "Expression"
+									}
+								}
+							},
+							"fieldList": [
+								"childItems"
+							],
+							"storeSettings": {
+								"type": "AzureDataLakeStoreReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "BinaryReadSettings"
+							}
+						}
+					},
+					{
+						"name": "Filter1",
+						"type": "Filter",
+						"dependsOn": [
+							{
+								"activity": "Get Metadata1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Get Metadata1').output.childitems",
+								"type": "Expression"
+							},
+							"condition": {
+								"value": "@equals(item().type,'File')",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"parameters": {
+					"SourceStore_Location": {
+						"type": "string"
+					},
+					"SourceStore_Directory": {
+						"type": "string"
+					},
+					"TargetStore_Location": {
+						"type": "string"
+					},
+					"TargetStore_Directory": {
+						"type": "string"
+					},
+					"SourceFileneme": {
+						"type": "string"
+					},
+					"TargetFilename": {
+						"type": "string"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/Source_Folder_Metadata_DS')]",
+				"[concat(variables('factoryId'), '/datasets/Source_ADLS_DS')]",
+				"[concat(variables('factoryId'), '/datasets/Target_BLOB_DS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/child_pipeline')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -329,6 +687,152 @@
 				"annotations": []
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/main_load_pipeline')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Main ETL Load and its getting metadata\nand calling each pipeline..",
+				"activities": [
+					{
+						"name": "Lookup1",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "AzureSQLJOBDataDS",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "ForEach1",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Lookup1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Lookup1').output.value",
+								"type": "Expression"
+							},
+							"isSequential": false,
+							"activities": [
+								{
+									"name": "child_load_pipeline",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "child_load_pipeline",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": false,
+										"parameters": {
+											"SourceStore_Location": {
+												"value": "@item().src_folderpath",
+												"type": "Expression"
+											},
+											"SourceStore_Directory": {
+												"value": "@item().directory",
+												"type": "Expression"
+											},
+											"TargetStore_Location": {
+												"value": "@item().tgt_folderpath",
+												"type": "Expression"
+											},
+											"TargetStore_Directory": {
+												"value": "@item().directory",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/AzureSQLJOBDataDS')]",
+				"[concat(variables('factoryId'), '/pipelines/child_load_pipeline')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSQLJOBDataDS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "Metadata_SQLDB_LS",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "id",
+						"type": "varchar"
+					},
+					{
+						"name": "jobname",
+						"type": "varchar"
+					},
+					{
+						"name": "src_folderpath",
+						"type": "varchar"
+					},
+					{
+						"name": "tgt_folderpath",
+						"type": "varchar"
+					},
+					{
+						"name": "directory",
+						"type": "varchar"
+					},
+					{
+						"name": "status",
+						"type": "varchar"
+					},
+					{
+						"name": "processedon",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "JOB_LIST"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/Metadata_SQLDB_LS')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/DS_ADLS_SRC_DEPT')]",
@@ -629,6 +1133,164 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/Source_ADLS_DS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ADLS",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"FolderPath": {
+						"type": "string"
+					},
+					"Directory": {
+						"type": "string"
+					},
+					"filename": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureDataLakeStoreLocation",
+						"fileName": {
+							"value": "@concat(dataset().Directory,'/',dataset().filename)",
+							"type": "Expression"
+						},
+						"folderPath": "staging"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Source_Folder_Metadata_DS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ADLS",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"FolderPath": {
+						"type": "string"
+					},
+					"Directory": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureDataLakeStoreLocation",
+						"folderPath": {
+							"value": "@concat(dataset().FolderPath,'/',dataset().Directory)",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Target_BLOB_DS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ABLB_Stage",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"FolderPath": {
+						"type": "string"
+					},
+					"Directory": {
+						"type": "string"
+					},
+					"filename": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"container": {
+							"value": "@concat(dataset().FolderPath)",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_ABLB_Stage')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ADLS_GEN1_LS')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureDataLakeStore",
+				"typeProperties": {
+					"dataLakeStoreUri": "[parameters('ADLS_GEN1_LS_properties_typeProperties_dataLakeStoreUri')]",
+					"servicePrincipalId": "[parameters('ADLS_GEN1_LS_properties_typeProperties_servicePrincipalId')]",
+					"servicePrincipalKey": {
+						"type": "SecureString",
+						"value": "[parameters('ADLS_GEN1_LS_servicePrincipalKey')]"
+					},
+					"tenant": "[parameters('ADLS_GEN1_LS_properties_typeProperties_tenant')]",
+					"subscriptionId": "[parameters('ADLS_GEN1_LS_properties_typeProperties_subscriptionId')]",
+					"resourceGroupName": "[parameters('ADLS_GEN1_LS_properties_typeProperties_resourceGroupName')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureDatabricks_LS')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureDatabricks",
+				"typeProperties": {
+					"domain": "https://adb-8801941167707345.5.azuredatabricks.net",
+					"accessToken": {
+						"type": "SecureString",
+						"value": "[parameters('AzureDatabricks_LS_accessToken')]"
+					},
+					"existingClusterId": "1228-025817-tired822"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/BLOB_STORAGE_GEN2_LS')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"connectionString": "[parameters('BLOB_STORAGE_GEN2_LS_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/LS_ABLB_SRC')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
@@ -713,6 +1375,53 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/integrationRuntimes/SelfHosted-IR')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Metadata_SQLDB_LS')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"connectionString": "[parameters('Metadata_SQLDB_LS_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Test_Pipeline_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "child_pipeline",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"P_Name": "[parameters('Test_Pipeline_Trigger_properties_child_pipeline_parameters_P_Name')]",
+							"P_Age": "[parameters('Test_Pipeline_Trigger_properties_child_pipeline_parameters_P_Age')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Minute",
+						"interval": 1,
+						"startTime": "2021-02-12T01:54:00",
+						"endTime": "2021-02-12T08:05:00",
+						"timeZone": "India Standard Time"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/child_pipeline')]"
 			]
 		},
 		{
@@ -891,38 +1600,56 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/Test_Pipeline_Trigger')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
+			"name": "[concat(parameters('factoryName'), '/Test_Pipeline')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipelines": [
+				"activities": [
 					{
-						"pipelineReference": {
-							"referenceName": "pipeline1",
-							"type": "PipelineReference"
+						"name": "Lookup1",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
 						},
-						"parameters": {
-							"P_Name": "[parameters('Test_Pipeline_Trigger_properties_pipeline1_parameters_P_Name')]",
-							"P_Age": "[parameters('Test_Pipeline_Trigger_properties_pipeline1_parameters_P_Age')]"
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "AzureSQLJOBDataDS",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
 						}
 					}
 				],
-				"type": "ScheduleTrigger",
-				"typeProperties": {
-					"recurrence": {
-						"frequency": "Minute",
-						"interval": 1,
-						"startTime": "2021-02-12T01:54:00",
-						"endTime": "2021-02-12T08:05:00",
-						"timeZone": "India Standard Time"
-					}
-				}
+				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/pipeline1')]"
+				"[concat(variables('factoryId'), '/datasets/AzureSQLJOBDataDS')]"
 			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_ABLB_Stage')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"connectionString": "[parameters('LS_ABLB_Stage_connectionString')]"
+				}
+			},
+			"dependsOn": []
 		}
 	]
 }

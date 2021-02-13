@@ -5,6 +5,15 @@
 		"factoryName": {
 			"value": "sampysparkadfv2"
 		},
+		"ADLS_GEN1_LS_servicePrincipalKey": {
+			"value": ""
+		},
+		"AzureDatabricks_LS_accessToken": {
+			"value": ""
+		},
+		"BLOB_STORAGE_GEN2_LS_connectionString": {
+			"value": ""
+		},
 		"LS_ABLB_SRC_connectionString": {
 			"value": ""
 		},
@@ -19,6 +28,27 @@
 		},
 		"LS_ORCL_SRC_DB_connectionString": {
 			"value": ""
+		},
+		"Metadata_SQLDB_LS_connectionString": {
+			"value": ""
+		},
+		"LS_ABLB_Stage_connectionString": {
+			"value": ""
+		},
+		"ADLS_GEN1_LS_properties_typeProperties_dataLakeStoreUri": {
+			"value": "https://azureadlsgen1.azuredatalakestore.net/webhdfs/v1"
+		},
+		"ADLS_GEN1_LS_properties_typeProperties_servicePrincipalId": {
+			"value": "18fc6caa-cd63-4a7a-b55e-6e8cfa5aac71"
+		},
+		"ADLS_GEN1_LS_properties_typeProperties_tenant": {
+			"value": "09d69696-ccc0-4686-b28c-6e053d4d3f03"
+		},
+		"ADLS_GEN1_LS_properties_typeProperties_subscriptionId": {
+			"value": "bd66c874-48fe-4dc8-87c6-d2d0e4100413"
+		},
+		"ADLS_GEN1_LS_properties_typeProperties_resourceGroupName": {
+			"value": "my_rg"
 		},
 		"LS_ADLS_properties_typeProperties_dataLakeStoreUri": {
 			"value": "https://samdatalake.azuredatalakestore.net/webhdfs/v1"
@@ -50,10 +80,10 @@
 		"LS_ADLS_TEST_properties_typeProperties_resourceGroupName": {
 			"value": "rg_dev"
 		},
-		"Test_Pipeline_Trigger_properties_pipeline1_parameters_P_Name": {
+		"Test_Pipeline_Trigger_properties_child_pipeline_parameters_P_Name": {
 			"value": "sam"
 		},
-		"Test_Pipeline_Trigger_properties_pipeline1_parameters_P_Age": {
+		"Test_Pipeline_Trigger_properties_child_pipeline_parameters_P_Age": {
 			"value": "20"
 		},
 		"containerUri": {

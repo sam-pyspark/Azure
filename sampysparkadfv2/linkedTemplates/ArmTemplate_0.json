@@ -7,6 +7,18 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "sampysparkadfv2"
 		},
+		"ADLS_GEN1_LS_servicePrincipalKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'servicePrincipalKey' of 'ADLS_GEN1_LS'"
+		},
+		"AzureDatabricks_LS_accessToken": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accessToken' of 'AzureDatabricks_LS'"
+		},
+		"BLOB_STORAGE_GEN2_LS_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'BLOB_STORAGE_GEN2_LS'"
+		},
 		"LS_ABLB_SRC_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'LS_ABLB_SRC'"
@@ -23,9 +35,33 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'servicePrincipalKey' of 'LS_ADLS_TEST'"
 		},
-		"LS_ORCL_SRC_DB_connectionString": {
+		"Metadata_SQLDB_LS_connectionString": {
 			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'LS_ORCL_SRC_DB'"
+			"metadata": "Secure string for 'connectionString' of 'Metadata_SQLDB_LS'"
+		},
+		"LS_ABLB_Stage_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'LS_ABLB_Stage'"
+		},
+		"ADLS_GEN1_LS_properties_typeProperties_dataLakeStoreUri": {
+			"type": "string",
+			"defaultValue": "https://azureadlsgen1.azuredatalakestore.net/webhdfs/v1"
+		},
+		"ADLS_GEN1_LS_properties_typeProperties_servicePrincipalId": {
+			"type": "string",
+			"defaultValue": "18fc6caa-cd63-4a7a-b55e-6e8cfa5aac71"
+		},
+		"ADLS_GEN1_LS_properties_typeProperties_tenant": {
+			"type": "string",
+			"defaultValue": "09d69696-ccc0-4686-b28c-6e053d4d3f03"
+		},
+		"ADLS_GEN1_LS_properties_typeProperties_subscriptionId": {
+			"type": "string",
+			"defaultValue": "bd66c874-48fe-4dc8-87c6-d2d0e4100413"
+		},
+		"ADLS_GEN1_LS_properties_typeProperties_resourceGroupName": {
+			"type": "string",
+			"defaultValue": "my_rg"
 		},
 		"LS_ADLS_properties_typeProperties_dataLakeStoreUri": {
 			"type": "string",
@@ -66,14 +102,6 @@
 		"LS_ADLS_TEST_properties_typeProperties_resourceGroupName": {
 			"type": "string",
 			"defaultValue": "rg_dev"
-		},
-		"Test_Pipeline_Trigger_properties_pipeline1_parameters_P_Name": {
-			"type": "string",
-			"defaultValue": "sam"
-		},
-		"Test_Pipeline_Trigger_properties_pipeline1_parameters_P_Age": {
-			"type": "string",
-			"defaultValue": "20"
 		}
 	},
 	"variables": {
@@ -81,7 +109,7 @@
 	},
 	"resources": [
 		{
-			"name": "[concat(parameters('factoryName'), '/pipeline1')]",
+			"name": "[concat(parameters('factoryName'), '/child_pipeline')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -146,6 +174,58 @@
 					}
 				},
 				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ADLS_GEN1_LS')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureDataLakeStore",
+				"typeProperties": {
+					"dataLakeStoreUri": "[parameters('ADLS_GEN1_LS_properties_typeProperties_dataLakeStoreUri')]",
+					"servicePrincipalId": "[parameters('ADLS_GEN1_LS_properties_typeProperties_servicePrincipalId')]",
+					"servicePrincipalKey": {
+						"type": "SecureString",
+						"value": "[parameters('ADLS_GEN1_LS_servicePrincipalKey')]"
+					},
+					"tenant": "[parameters('ADLS_GEN1_LS_properties_typeProperties_tenant')]",
+					"subscriptionId": "[parameters('ADLS_GEN1_LS_properties_typeProperties_subscriptionId')]",
+					"resourceGroupName": "[parameters('ADLS_GEN1_LS_properties_typeProperties_resourceGroupName')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureDatabricks_LS')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureDatabricks",
+				"typeProperties": {
+					"domain": "https://adb-8801941167707345.5.azuredatabricks.net",
+					"accessToken": {
+						"type": "SecureString",
+						"value": "[parameters('AzureDatabricks_LS_accessToken')]"
+					},
+					"existingClusterId": "1228-025817-tired822"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/BLOB_STORAGE_GEN2_LS')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"connectionString": "[parameters('BLOB_STORAGE_GEN2_LS_connectionString')]"
+				}
 			},
 			"dependsOn": []
 		},
@@ -218,6 +298,19 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/Metadata_SQLDB_LS')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"connectionString": "[parameters('Metadata_SQLDB_LS_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/SelfHosted-IR')]",
 			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
 			"apiVersion": "2018-06-01",
@@ -226,6 +319,71 @@
 				"typeProperties": {}
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_ABLB_Stage')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"connectionString": "[parameters('LS_ABLB_Stage_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSQLJOBDataDS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "Metadata_SQLDB_LS",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "id",
+						"type": "varchar"
+					},
+					{
+						"name": "jobname",
+						"type": "varchar"
+					},
+					{
+						"name": "src_folderpath",
+						"type": "varchar"
+					},
+					{
+						"name": "tgt_folderpath",
+						"type": "varchar"
+					},
+					{
+						"name": "directory",
+						"type": "varchar"
+					},
+					{
+						"name": "status",
+						"type": "varchar"
+					},
+					{
+						"name": "processedon",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "JOB_LIST"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/Metadata_SQLDB_LS')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/DS_ADLS_SRC_DEPT')]",
@@ -526,315 +684,40 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/LS_ORCL_SRC_DB')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"name": "[concat(parameters('factoryName'), '/Source_ADLS_DS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
-				"annotations": [],
-				"type": "Oracle",
-				"typeProperties": {
-					"connectionString": "[parameters('LS_ORCL_SRC_DB_connectionString')]"
+				"linkedServiceName": {
+					"referenceName": "LS_ADLS",
+					"type": "LinkedServiceReference"
 				},
-				"connectVia": {
-					"referenceName": "SelfHosted-IR",
-					"type": "IntegrationRuntimeReference"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/SelfHosted-IR')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/Test_Pipeline_Trigger')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
+				"parameters": {
+					"FolderPath": {
+						"type": "string"
+					},
+					"Directory": {
+						"type": "string"
+					},
+					"filename": {
+						"type": "string"
+					}
+				},
 				"annotations": [],
-				"runtimeState": "Started",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "pipeline1",
-							"type": "PipelineReference"
-						},
-						"parameters": {
-							"P_Name": "[parameters('Test_Pipeline_Trigger_properties_pipeline1_parameters_P_Name')]",
-							"P_Age": "[parameters('Test_Pipeline_Trigger_properties_pipeline1_parameters_P_Age')]"
-						}
-					}
-				],
-				"type": "ScheduleTrigger",
+				"type": "Binary",
 				"typeProperties": {
-					"recurrence": {
-						"frequency": "Minute",
-						"interval": 1,
-						"startTime": "2021-02-12T01:54:00",
-						"endTime": "2021-02-12T08:05:00",
-						"timeZone": "India Standard Time"
+					"location": {
+						"type": "AzureDataLakeStoreLocation",
+						"fileName": {
+							"value": "@concat(dataset().Directory,'/',dataset().filename)",
+							"type": "Expression"
+						},
+						"folderPath": "staging"
 					}
 				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/pipeline1')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/df_Schema_modifiers')]",
-			"type": "Microsoft.DataFactory/factories/dataflows",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "MappingDataFlow",
-				"typeProperties": {
-					"sources": [
-						{
-							"dataset": {
-								"referenceName": "DS_ADLS_SRC_JSON",
-								"type": "DatasetReference"
-							},
-							"name": "source1"
-						}
-					],
-					"sinks": [
-						{
-							"dataset": {
-								"referenceName": "DS_BLOB_TGT_EMP",
-								"type": "DatasetReference"
-							},
-							"name": "sink1"
-						}
-					],
-					"transformations": [
-						{
-							"name": "Flatten1"
-						},
-						{
-							"name": "Flatten2"
-						},
-						{
-							"name": "Flatten3"
-						},
-						{
-							"name": "Flatten4"
-						}
-					],
-					"script": "source(output(\n\t\tname as string,\n\t\tlocation as string,\n\t\tsatellites as string[],\n\t\tgoods as (trade as boolean, customers as string[], orders as (orderId as string, orderTotal as double, shipped as (orderItems as (itemName as string, itemQty as string)[]))[])\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tdocumentForm: 'singleDocument') ~> source1\nsource1 foldDown(unroll(satellites),\n\tmapColumn(\n\t\tname,\n\t\tlocation,\n\t\tsatellites,\n\t\tgoods\n\t),\n\tskipDuplicateMapInputs: false,\n\tskipDuplicateMapOutputs: false) ~> Flatten1\nFlatten1 foldDown(unroll(goods.orders),\n\tmapColumn(\n\t\tname,\n\t\tlocation,\n\t\tsatellites,\n\t\ttrade = goods.trade,\n\t\tcustomers = goods.customers,\n\t\torderId = goods.orders.orderId,\n\t\torderTotal = goods.orders.orderTotal,\n\t\tshipped = goods.orders.shipped\n\t),\n\tskipDuplicateMapInputs: false,\n\tskipDuplicateMapOutputs: false) ~> Flatten2\nFlatten2 foldDown(unroll(customers),\n\tmapColumn(\n\t\tname,\n\t\tlocation,\n\t\tsatellites,\n\t\ttrade,\n\t\tcustomers,\n\t\torderId,\n\t\torderTotal,\n\t\tshipped\n\t),\n\tskipDuplicateMapInputs: false,\n\tskipDuplicateMapOutputs: false) ~> Flatten3\nFlatten3 foldDown(unroll(shipped.orderItems),\n\tmapColumn(\n\t\tname,\n\t\tlocation,\n\t\tsatellites,\n\t\ttrade,\n\t\tcustomers,\n\t\torderId,\n\t\torderTotal,\n\t\titemName = shipped.orderItems.itemName,\n\t\titemQty = shipped.orderItems.itemQty\n\t),\n\tskipDuplicateMapInputs: false,\n\tskipDuplicateMapOutputs: false) ~> Flatten4\nFlatten4 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['sample_json.csv'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink1"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_ADLS_SRC_JSON')]",
-				"[concat(variables('factoryId'), '/datasets/DS_BLOB_TGT_EMP')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/df_emp_filter_sort')]",
-			"type": "Microsoft.DataFactory/factories/dataflows",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "MappingDataFlow",
-				"typeProperties": {
-					"sources": [
-						{
-							"dataset": {
-								"referenceName": "DS_ADLS_SRC_EMP",
-								"type": "DatasetReference"
-							},
-							"name": "source1"
-						}
-					],
-					"sinks": [
-						{
-							"dataset": {
-								"referenceName": "DS_BLOB_TGT_EMP",
-								"type": "DatasetReference"
-							},
-							"name": "sink1"
-						},
-						{
-							"dataset": {
-								"referenceName": "DS_BLOB_TGT_EMP",
-								"type": "DatasetReference"
-							},
-							"name": "sink2"
-						}
-					],
-					"transformations": [
-						{
-							"name": "Filter1"
-						},
-						{
-							"name": "Sort1"
-						}
-					],
-					"script": "source(output(\n\t\tEMPNO as short,\n\t\tENAME as string,\n\t\tJOB as string,\n\t\tMGR as string,\n\t\tHIREDATE as string,\n\t\tSAL as short,\n\t\tCOMM as string,\n\t\tDEPTNO as short\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> source1\nsource1 filter(DEPTNO == 10) ~> Filter1\nsource1 sort(asc(DEPTNO, true)) ~> Sort1\nFilter1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['emp_filter.csv'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink1\nSort1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['emp_sort..csv'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink2"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_ADLS_SRC_EMP')]",
-				"[concat(variables('factoryId'), '/datasets/DS_BLOB_TGT_EMP')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/df_exists_union_lookup')]",
-			"type": "Microsoft.DataFactory/factories/dataflows",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "MappingDataFlow",
-				"typeProperties": {
-					"sources": [
-						{
-							"dataset": {
-								"referenceName": "DS_ADLS_SRC_EMP",
-								"type": "DatasetReference"
-							},
-							"name": "source1"
-						},
-						{
-							"dataset": {
-								"referenceName": "DS_ADLS_SRC_DEPT",
-								"type": "DatasetReference"
-							},
-							"name": "source2"
-						},
-						{
-							"dataset": {
-								"referenceName": "DS_ADLS_SRC_EMP",
-								"type": "DatasetReference"
-							},
-							"name": "source3"
-						},
-						{
-							"dataset": {
-								"referenceName": "DS_ADLS_SRC_DEPT",
-								"type": "DatasetReference"
-							},
-							"name": "source4"
-						}
-					],
-					"sinks": [
-						{
-							"dataset": {
-								"referenceName": "DS_BLOB_TGT_EXISTS_UNION_LOOKUP",
-								"type": "DatasetReference"
-							},
-							"name": "sink1"
-						},
-						{
-							"dataset": {
-								"referenceName": "DS_BLOB_TGT_EXISTS_UNION_LOOKUP",
-								"type": "DatasetReference"
-							},
-							"name": "sink2"
-						}
-					],
-					"transformations": [
-						{
-							"name": "Exists1"
-						},
-						{
-							"name": "Union1"
-						}
-					],
-					"script": "source(output(\n\t\tEMPNO as string,\n\t\tENAME as string,\n\t\tJOB as string,\n\t\tMGR as string,\n\t\tHIREDATE as string,\n\t\tSAL as string,\n\t\tCOMM as string,\n\t\tDEPTNO as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> source1\nsource(output(\n\t\tDeptno as string,\n\t\tDname as string,\n\t\tLoc as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> source2\nsource(output(\n\t\tEMPNO as string,\n\t\tENAME as string,\n\t\tJOB as string,\n\t\tMGR as string,\n\t\tHIREDATE as string,\n\t\tSAL as string,\n\t\tCOMM as string,\n\t\tDEPTNO as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> source3\nsource(output(\n\t\tDeptno as string,\n\t\tDname as string,\n\t\tLoc as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> source4\nsource1, source2 exists(source1@DEPTNO == source2@Deptno,\n\tnegate:true,\n\tbroadcast: 'auto')~> Exists1\nsource3, source4 union(byName: true)~> Union1\nExists1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink1\nUnion1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['emp_dept_union.csv'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink2"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_ADLS_SRC_EMP')]",
-				"[concat(variables('factoryId'), '/datasets/DS_ADLS_SRC_DEPT')]",
-				"[concat(variables('factoryId'), '/datasets/DS_BLOB_TGT_EXISTS_UNION_LOOKUP')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PL_TRANS_ADLS_TO_BLOB')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"description": "joining emp and dept tables from ADLS and creating file in BLOB",
-				"activities": [
-					{
-						"name": "df_emp_dept",
-						"type": "ExecuteDataFlow",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "df_emp_filter_sort",
-								"type": "DataFlowReference",
-								"parameters": {},
-								"datasetParameters": {
-									"source1": {},
-									"sink1": {},
-									"sink2": {}
-								}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"traceLevel": "Fine"
-						}
-					}
-				],
-				"annotations": [],
-				"lastPublishTime": "2021-02-01T02:15:15Z"
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/dataflows/df_emp_filter_sort')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PL_TRANS_EXISTS_UNION_LOOKUP')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "df_exists_union_lookup",
-						"type": "ExecuteDataFlow",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "df_exists_union_lookup",
-								"type": "DataFlowReference",
-								"parameters": {},
-								"datasetParameters": {
-									"source1": {},
-									"source2": {},
-									"source3": {},
-									"source4": {},
-									"sink1": {},
-									"sink2": {}
-								}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"traceLevel": "Fine"
-						}
-					}
-				],
-				"annotations": [],
-				"lastPublishTime": "2021-02-01T06:58:37Z"
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/dataflows/df_exists_union_lookup')]"
+				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS')]"
 			]
 		}
 	]

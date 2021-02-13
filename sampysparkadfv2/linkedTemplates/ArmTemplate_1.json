@@ -6,12 +6,739 @@
 			"type": "string",
 			"metadata": "Data Factory name",
 			"defaultValue": "sampysparkadfv2"
+		},
+		"LS_ORCL_SRC_DB_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'LS_ORCL_SRC_DB'"
+		},
+		"Test_Pipeline_Trigger_properties_child_pipeline_parameters_P_Name": {
+			"type": "string",
+			"defaultValue": "sam"
+		},
+		"Test_Pipeline_Trigger_properties_child_pipeline_parameters_P_Age": {
+			"type": "string",
+			"defaultValue": "20"
 		}
 	},
 	"variables": {
 		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
 	},
 	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/Source_Folder_Metadata_DS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ADLS",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"FolderPath": {
+						"type": "string"
+					},
+					"Directory": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureDataLakeStoreLocation",
+						"folderPath": {
+							"value": "@concat(dataset().FolderPath,'/',dataset().Directory)",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Target_BLOB_DS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ABLB_Stage",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"FolderPath": {
+						"type": "string"
+					},
+					"Directory": {
+						"type": "string"
+					},
+					"filename": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"container": {
+							"value": "@concat(dataset().FolderPath)",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_ORCL_SRC_DB')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "Oracle",
+				"typeProperties": {
+					"connectionString": "[parameters('LS_ORCL_SRC_DB_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "SelfHosted-IR",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Test_Pipeline_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "child_pipeline",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"P_Name": "[parameters('Test_Pipeline_Trigger_properties_child_pipeline_parameters_P_Name')]",
+							"P_Age": "[parameters('Test_Pipeline_Trigger_properties_child_pipeline_parameters_P_Age')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Minute",
+						"interval": 1,
+						"startTime": "2021-02-12T01:54:00",
+						"endTime": "2021-02-12T08:05:00",
+						"timeZone": "India Standard Time"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Master_pipeline')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Get Metadata1",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "DS_ADLS_SRC_DEPT",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"fieldList": [
+								"itemName",
+								"itemType"
+							],
+							"storeSettings": {
+								"type": "AzureDataLakeStoreReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
+							}
+						}
+					},
+					{
+						"name": "Set variable1",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Get Metadata1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "V_childItems",
+							"value": {
+								"value": "@activity('Get Metadata1').output.itemName",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Lookup1",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureDataLakeStoreReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"dataset": {
+								"referenceName": "DS_ADLS_SRC_DEPT",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						}
+					},
+					{
+						"name": "Validation1",
+						"type": "Validation",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "DS_ADLS_SRC_DEPT",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"timeout": "7.00:00:00",
+							"sleep": 10
+						}
+					},
+					{
+						"name": "Wait1",
+						"type": "Wait",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"waitTimeInSeconds": 1
+						}
+					}
+				],
+				"variables": {
+					"V_childItems": {
+						"type": "String",
+						"defaultValue": "Null"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/child_load_pipeline')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Hello from NDC Sydney!!!",
+				"activities": [
+					{
+						"name": "ForEach1",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Filter1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Filter1').output.value",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Copy data1",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "BinarySource",
+											"storeSettings": {
+												"type": "AzureDataLakeStoreReadSettings",
+												"recursive": true
+											},
+											"formatSettings": {
+												"type": "BinaryReadSettings"
+											}
+										},
+										"sink": {
+											"type": "BinarySink",
+											"storeSettings": {
+												"type": "AzureBlobStorageWriteSettings"
+											}
+										},
+										"enableStaging": false
+									},
+									"inputs": [
+										{
+											"referenceName": "Source_ADLS_DS",
+											"type": "DatasetReference",
+											"parameters": {
+												"FolderPath": {
+													"value": "@pipeline().parameters.SourceStore_Location",
+													"type": "Expression"
+												},
+												"Directory": {
+													"value": "@pipeline().parameters.SourceStore_Directory",
+													"type": "Expression"
+												},
+												"filename": {
+													"value": "@item().name",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "Target_BLOB_DS",
+											"type": "DatasetReference",
+											"parameters": {
+												"FolderPath": {
+													"value": "@pipeline().parameters.TargetStore_Location",
+													"type": "Expression"
+												},
+												"Directory": {
+													"value": "@pipeline().parameters.TargetStore_Directory",
+													"type": "Expression"
+												},
+												"filename": {
+													"value": "*.csv",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					},
+					{
+						"name": "Get Metadata1",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "Source_Folder_Metadata_DS",
+								"type": "DatasetReference",
+								"parameters": {
+									"FolderPath": {
+										"value": "@pipeline().parameters.SourceStore_Location",
+										"type": "Expression"
+									},
+									"Directory": {
+										"value": "@pipeline().parameters.SourceStore_Directory",
+										"type": "Expression"
+									}
+								}
+							},
+							"fieldList": [
+								"childItems"
+							],
+							"storeSettings": {
+								"type": "AzureDataLakeStoreReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "BinaryReadSettings"
+							}
+						}
+					},
+					{
+						"name": "Filter1",
+						"type": "Filter",
+						"dependsOn": [
+							{
+								"activity": "Get Metadata1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Get Metadata1').output.childitems",
+								"type": "Expression"
+							},
+							"condition": {
+								"value": "@equals(item().type,'File')",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"parameters": {
+					"SourceStore_Location": {
+						"type": "string"
+					},
+					"SourceStore_Directory": {
+						"type": "string"
+					},
+					"TargetStore_Location": {
+						"type": "string"
+					},
+					"TargetStore_Directory": {
+						"type": "string"
+					},
+					"SourceFileneme": {
+						"type": "string"
+					},
+					"TargetFilename": {
+						"type": "string"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/Source_Folder_Metadata_DS')]",
+				"[concat(variables('factoryId'), '/datasets/Target_BLOB_DS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/df_Schema_modifiers')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "DS_ADLS_SRC_JSON",
+								"type": "DatasetReference"
+							},
+							"name": "source1"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "DS_BLOB_TGT_EMP",
+								"type": "DatasetReference"
+							},
+							"name": "sink1"
+						}
+					],
+					"transformations": [
+						{
+							"name": "Flatten1"
+						},
+						{
+							"name": "Flatten2"
+						},
+						{
+							"name": "Flatten3"
+						},
+						{
+							"name": "Flatten4"
+						}
+					],
+					"script": "source(output(\n\t\tname as string,\n\t\tlocation as string,\n\t\tsatellites as string[],\n\t\tgoods as (trade as boolean, customers as string[], orders as (orderId as string, orderTotal as double, shipped as (orderItems as (itemName as string, itemQty as string)[]))[])\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tdocumentForm: 'singleDocument') ~> source1\nsource1 foldDown(unroll(satellites),\n\tmapColumn(\n\t\tname,\n\t\tlocation,\n\t\tsatellites,\n\t\tgoods\n\t),\n\tskipDuplicateMapInputs: false,\n\tskipDuplicateMapOutputs: false) ~> Flatten1\nFlatten1 foldDown(unroll(goods.orders),\n\tmapColumn(\n\t\tname,\n\t\tlocation,\n\t\tsatellites,\n\t\ttrade = goods.trade,\n\t\tcustomers = goods.customers,\n\t\torderId = goods.orders.orderId,\n\t\torderTotal = goods.orders.orderTotal,\n\t\tshipped = goods.orders.shipped\n\t),\n\tskipDuplicateMapInputs: false,\n\tskipDuplicateMapOutputs: false) ~> Flatten2\nFlatten2 foldDown(unroll(customers),\n\tmapColumn(\n\t\tname,\n\t\tlocation,\n\t\tsatellites,\n\t\ttrade,\n\t\tcustomers,\n\t\torderId,\n\t\torderTotal,\n\t\tshipped\n\t),\n\tskipDuplicateMapInputs: false,\n\tskipDuplicateMapOutputs: false) ~> Flatten3\nFlatten3 foldDown(unroll(shipped.orderItems),\n\tmapColumn(\n\t\tname,\n\t\tlocation,\n\t\tsatellites,\n\t\ttrade,\n\t\tcustomers,\n\t\torderId,\n\t\torderTotal,\n\t\titemName = shipped.orderItems.itemName,\n\t\titemQty = shipped.orderItems.itemQty\n\t),\n\tskipDuplicateMapInputs: false,\n\tskipDuplicateMapOutputs: false) ~> Flatten4\nFlatten4 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['sample_json.csv'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink1"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/df_emp_filter_sort')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "DS_ADLS_SRC_EMP",
+								"type": "DatasetReference"
+							},
+							"name": "source1"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "DS_BLOB_TGT_EMP",
+								"type": "DatasetReference"
+							},
+							"name": "sink1"
+						},
+						{
+							"dataset": {
+								"referenceName": "DS_BLOB_TGT_EMP",
+								"type": "DatasetReference"
+							},
+							"name": "sink2"
+						}
+					],
+					"transformations": [
+						{
+							"name": "Filter1"
+						},
+						{
+							"name": "Sort1"
+						}
+					],
+					"script": "source(output(\n\t\tEMPNO as short,\n\t\tENAME as string,\n\t\tJOB as string,\n\t\tMGR as string,\n\t\tHIREDATE as string,\n\t\tSAL as short,\n\t\tCOMM as string,\n\t\tDEPTNO as short\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> source1\nsource1 filter(DEPTNO == 10) ~> Filter1\nsource1 sort(asc(DEPTNO, true)) ~> Sort1\nFilter1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['emp_filter.csv'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink1\nSort1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['emp_sort..csv'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink2"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/df_exists_union_lookup')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "DS_ADLS_SRC_EMP",
+								"type": "DatasetReference"
+							},
+							"name": "source1"
+						},
+						{
+							"dataset": {
+								"referenceName": "DS_ADLS_SRC_DEPT",
+								"type": "DatasetReference"
+							},
+							"name": "source2"
+						},
+						{
+							"dataset": {
+								"referenceName": "DS_ADLS_SRC_EMP",
+								"type": "DatasetReference"
+							},
+							"name": "source3"
+						},
+						{
+							"dataset": {
+								"referenceName": "DS_ADLS_SRC_DEPT",
+								"type": "DatasetReference"
+							},
+							"name": "source4"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "DS_BLOB_TGT_EXISTS_UNION_LOOKUP",
+								"type": "DatasetReference"
+							},
+							"name": "sink1"
+						},
+						{
+							"dataset": {
+								"referenceName": "DS_BLOB_TGT_EXISTS_UNION_LOOKUP",
+								"type": "DatasetReference"
+							},
+							"name": "sink2"
+						}
+					],
+					"transformations": [
+						{
+							"name": "Exists1"
+						},
+						{
+							"name": "Union1"
+						}
+					],
+					"script": "source(output(\n\t\tEMPNO as string,\n\t\tENAME as string,\n\t\tJOB as string,\n\t\tMGR as string,\n\t\tHIREDATE as string,\n\t\tSAL as string,\n\t\tCOMM as string,\n\t\tDEPTNO as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> source1\nsource(output(\n\t\tDeptno as string,\n\t\tDname as string,\n\t\tLoc as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> source2\nsource(output(\n\t\tEMPNO as string,\n\t\tENAME as string,\n\t\tJOB as string,\n\t\tMGR as string,\n\t\tHIREDATE as string,\n\t\tSAL as string,\n\t\tCOMM as string,\n\t\tDEPTNO as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> source3\nsource(output(\n\t\tDeptno as string,\n\t\tDname as string,\n\t\tLoc as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> source4\nsource1, source2 exists(source1@DEPTNO == source2@Deptno,\n\tnegate:true,\n\tbroadcast: 'auto')~> Exists1\nsource3, source4 union(byName: true)~> Union1\nExists1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink1\nUnion1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['emp_dept_union.csv'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink2"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Test_Pipeline')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Lookup1",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "AzureSQLJOBDataDS",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					}
+				],
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_TRANS_ADLS_TO_BLOB')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "joining emp and dept tables from ADLS and creating file in BLOB",
+				"activities": [
+					{
+						"name": "df_emp_dept",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "df_emp_filter_sort",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"source1": {},
+									"sink1": {},
+									"sink2": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"annotations": [],
+				"lastPublishTime": "2021-02-01T02:15:15Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/df_emp_filter_sort')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_TRANS_EXISTS_UNION_LOOKUP')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "df_exists_union_lookup",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "df_exists_union_lookup",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"source1": {},
+									"source2": {},
+									"source3": {},
+									"source4": {},
+									"sink1": {},
+									"sink2": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"annotations": [],
+				"lastPublishTime": "2021-02-01T06:58:37Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/df_exists_union_lookup')]"
+			]
+		},
 		{
 			"name": "[concat(parameters('factoryName'), '/PL_TRANS_FILTER_SORT')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
@@ -52,7 +779,9 @@
 				],
 				"annotations": []
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/df_emp_filter_sort')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/PL_TRANS_JSON')]",
@@ -93,7 +822,102 @@
 				],
 				"annotations": []
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/df_Schema_modifiers')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/main_load_pipeline')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Main ETL Load and its getting metadata\nand calling each pipeline..",
+				"activities": [
+					{
+						"name": "Lookup1",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "AzureSQLJOBDataDS",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "ForEach1",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Lookup1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Lookup1').output.value",
+								"type": "Expression"
+							},
+							"isSequential": false,
+							"activities": [
+								{
+									"name": "child_load_pipeline",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "child_load_pipeline",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": false,
+										"parameters": {
+											"SourceStore_Location": {
+												"value": "@item().src_folderpath",
+												"type": "Expression"
+											},
+											"SourceStore_Directory": {
+												"value": "@item().directory",
+												"type": "Expression"
+											},
+											"TargetStore_Location": {
+												"value": "@item().tgt_folderpath",
+												"type": "Expression"
+											},
+											"TargetStore_Directory": {
+												"value": "@item().directory",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/child_load_pipeline')]"
+			]
 		}
 	]
 }
