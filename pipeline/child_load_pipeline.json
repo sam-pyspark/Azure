@@ -92,6 +92,79 @@
 									}
 								}
 							]
+						},
+						{
+							"name": "Stored procedure1",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "Copy data1",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[dbo].[PROC_ETL_LOAD_STATUS]",
+								"storedProcedureParameters": {
+									"activityname": {
+										"value": "",
+										"type": "String"
+									},
+									"activitystatus": {
+										"value": "",
+										"type": "String"
+									},
+									"Createdon": {
+										"value": "",
+										"type": "DateTime"
+									},
+									"DataFactoryName": {
+										"value": "",
+										"type": "String"
+									},
+									"endtime": {
+										"value": "",
+										"type": "DateTime"
+									},
+									"ErrorMessage": {
+										"value": "",
+										"type": "String"
+									},
+									"PipelineName": {
+										"value": "",
+										"type": "String"
+									},
+									"readrows": {
+										"value": "",
+										"type": "String"
+									},
+									"runid": {
+										"value": "",
+										"type": "String"
+									},
+									"starttime": {
+										"value": "",
+										"type": "DateTime"
+									},
+									"writerows": {
+										"value": "",
+										"type": "String"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "Metadata_SQLDB_LS",
+								"type": "LinkedServiceReference"
+							}
 						}
 					]
 				}
