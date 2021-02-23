@@ -29,7 +29,7 @@
 				}
 			},
 			{
-				"name": "ForEach1",
+				"name": "ForEach1_main",
 				"type": "ForEach",
 				"dependsOn": [
 					{
