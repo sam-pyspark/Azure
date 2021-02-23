@@ -116,71 +116,47 @@
 								"storedProcedureName": "[dbo].[PROC_ETL_LOAD_STATUS]",
 								"storedProcedureParameters": {
 									"activityname": {
-										"value": "Copyactivity",
+										"value": "",
 										"type": "String"
 									},
 									"activitystatus": {
-										"value": {
-											"value": "@activity('Copy data1').output.executionDetails[0].status",
-											"type": "Expression"
-										},
+										"value": "",
 										"type": "String"
 									},
 									"Createdon": {
-										"value": "@utcnow()",
+										"value": "",
 										"type": "DateTime"
 									},
 									"DataFactoryName": {
-										"value": {
-											"value": "@pipeline().DataFactory",
-											"type": "Expression"
-										},
+										"value": "",
 										"type": "String"
 									},
 									"endtime": {
-										"value": "@utcnow()",
+										"value": "",
 										"type": "DateTime"
 									},
 									"ErrorMessage": {
-										"value": {
-											"value": "@activity('Copy data1').output.errors",
-											"type": "Expression"
-										},
+										"value": "",
 										"type": "String"
 									},
 									"PipelineName": {
-										"value": {
-											"value": "@pipeline().Pipeline",
-											"type": "Expression"
-										},
+										"value": "",
 										"type": "String"
 									},
 									"readrows": {
-										"value": {
-											"value": "@activity('Copy data1').output.dataRead",
-											"type": "Expression"
-										},
+										"value": "",
 										"type": "String"
 									},
 									"runid": {
-										"value": {
-											"value": "@pipeline().RunId",
-											"type": "Expression"
-										},
+										"value": "",
 										"type": "String"
 									},
 									"starttime": {
-										"value": {
-											"value": "@activity('Copy data1').output.executionDetails[0].start",
-											"type": "Expression"
-										},
+										"value": "",
 										"type": "DateTime"
 									},
 									"writerows": {
-										"value": {
-											"value": "@activity('Copy data1').output.dataWritten",
-											"type": "Expression"
-										},
+										"value": "",
 										"type": "String"
 									}
 								}
