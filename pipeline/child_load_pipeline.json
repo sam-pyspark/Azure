@@ -4,7 +4,7 @@
 		"description": "Hello from NDC Sydney!!!",
 		"activities": [
 			{
-				"name": "ForEach1",
+				"name": "ForEach1_child",
 				"type": "ForEach",
 				"dependsOn": [
 					{
@@ -116,47 +116,71 @@
 								"storedProcedureName": "[dbo].[PROC_ETL_LOAD_STATUS]",
 								"storedProcedureParameters": {
 									"activityname": {
-										"value": "",
+										"value": "Copyactivity",
 										"type": "String"
 									},
 									"activitystatus": {
-										"value": "",
+										"value": {
+											"value": "@activity('Copy data1').output.executionDetails[0].status",
+											"type": "Expression"
+										},
 										"type": "String"
 									},
 									"Createdon": {
-										"value": "",
+										"value": "@utcnow()",
 										"type": "DateTime"
 									},
 									"DataFactoryName": {
-										"value": "",
+										"value": {
+											"value": "@pipeline().DataFactory",
+											"type": "Expression"
+										},
 										"type": "String"
 									},
 									"endtime": {
-										"value": "",
+										"value": "@utcnow()",
 										"type": "DateTime"
 									},
 									"ErrorMessage": {
-										"value": "",
+										"value": {
+											"value": "@activity('Copy data1').output.errors",
+											"type": "Expression"
+										},
 										"type": "String"
 									},
 									"PipelineName": {
-										"value": "",
+										"value": {
+											"value": "@pipeline().Pipeline",
+											"type": "Expression"
+										},
 										"type": "String"
 									},
 									"readrows": {
-										"value": "",
+										"value": {
+											"value": "@activity('Copy data1').output.dataRead",
+											"type": "Expression"
+										},
 										"type": "String"
 									},
 									"runid": {
-										"value": "",
+										"value": {
+											"value": "@pipeline().RunId",
+											"type": "Expression"
+										},
 										"type": "String"
 									},
 									"starttime": {
-										"value": "",
+										"value": {
+											"value": "@activity('Copy data1').output.executionDetails[0].start",
+											"type": "Expression"
+										},
 										"type": "DateTime"
 									},
 									"writerows": {
-										"value": "",
+										"value": {
+											"value": "@activity('Copy data1').output.dataWritten",
+											"type": "Expression"
+										},
 										"type": "String"
 									}
 								}
