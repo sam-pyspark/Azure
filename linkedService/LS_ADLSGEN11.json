@@ -1,0 +1,13 @@
+{
+	"name": "LS_ADLSGEN11",
+	"properties": {
+		"annotations": [],
+		"type": "AzureDataLakeStore",
+		"typeProperties": {
+			"dataLakeStoreUri": "https://samazureadlsgen11.azuredatalakestore.net/webhdfs/v1",
+			"tenant": "f5ed6da6-8d8c-4630-9ea0-84f71712a8a9",
+			"subscriptionId": "630349f3-1524-450f-bca3-48bbffdeaa93",
+			"resourceGroupName": "dev_rg"
+		}
+	}
+}
