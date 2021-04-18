@@ -25,6 +25,7 @@
 					],
 					"storeSettings": {
 						"type": "AzureDataLakeStoreReadSettings",
+						"recursive": true,
 						"enablePartitionDiscovery": false
 					},
 					"formatSettings": {
@@ -49,6 +50,7 @@
 						"value": "@activity('Get Metadata1').output.childitems",
 						"type": "Expression"
 					},
+					"isSequential": false,
 					"activities": [
 						{
 							"name": "Copy data1",
@@ -79,7 +81,12 @@
 										"type": "AzureBlobStorageWriteSettings"
 									}
 								},
-								"enableStaging": false
+								"enableStaging": false,
+								"parallelCopies": 3,
+								"skipErrorFile": {
+									"fileMissing": false,
+									"fileForbidden": false
+								}
 							},
 							"inputs": [
 								{
