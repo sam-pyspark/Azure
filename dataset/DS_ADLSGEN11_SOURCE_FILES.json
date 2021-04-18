@@ -1,0 +1,22 @@
+{
+	"name": "DS_ADLSGEN11_SOURCE_FILES",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ADLSGEN11",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"FileName": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "AzureDataLakeStoreLocation",
+				"folderPath": "Source"
+			}
+		}
+	}
+}
