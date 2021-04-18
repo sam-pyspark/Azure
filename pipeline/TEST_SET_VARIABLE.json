@@ -1,0 +1,26 @@
+{
+	"name": "TEST_SET_VARIABLE",
+	"properties": {
+		"activities": [
+			{
+				"name": "Set variable1",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "OUTVALUE",
+					"value": {
+						"value": "@formatDateTime(utcnow(),'dd')",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"variables": {
+			"OUTVALUE": {
+				"type": "String"
+			}
+		},
+		"annotations": []
+	}
+}
