@@ -82,7 +82,6 @@
 									}
 								},
 								"enableStaging": false,
-								"parallelCopies": 3,
 								"skipErrorFile": {
 									"fileMissing": false,
 									"fileForbidden": false
