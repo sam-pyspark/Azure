@@ -24,6 +24,7 @@
 					],
 					"storeSettings": {
 						"type": "AzureDataLakeStoreReadSettings",
+						"recursive": true,
 						"enablePartitionDiscovery": false
 					},
 					"formatSettings": {
@@ -89,7 +90,8 @@
 									"type": "BinarySource",
 									"storeSettings": {
 										"type": "AzureDataLakeStoreReadSettings",
-										"recursive": true
+										"recursive": true,
+										"deleteFilesAfterCompletion": false
 									},
 									"formatSettings": {
 										"type": "BinaryReadSettings"
