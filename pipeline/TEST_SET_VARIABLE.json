@@ -10,7 +10,7 @@
 				"typeProperties": {
 					"variableName": "OUTVALUE",
 					"value": {
-						"value": "@formatDateTime(utcnow(),'dd')",
+						"value": "@formatDateTime(utcnow(),'dy')",
 						"type": "Expression"
 					}
 				}
